@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>糖友食谱 - 糖尿病饮食管理助手</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <!-- 引入Chart.js用于图表 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <header class="main-header">
+            <div class="header-content">
+                <h1><i class="fas fa-heartbeat"></i> 糖友食谱助手</h1>
+                <p class="subtitle">科学控糖 · 健康饮食 · 个性化推荐</p>
+                <div class="header-stats">
+                    <div class="stat">
+                        <i class="fas fa-utensils"></i>
+                        <span>200+ 控糖食谱</span>
+                    </div>
+                    <div class="stat">
+                        <i class="fas fa-chart-line"></i>
+                        <span>智能血糖预测</span>
+                    </div>
+                    <div class="stat">
+                        <i class="fas fa-user-md"></i>
+                        <span>三甲医院营养师审核</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- 用户设置区 -->
+            <section class="user-settings">
+                <h2><i class="fas fa-user-cog"></i> 我的控糖方案</h2>
+                <div class="settings-grid">
+                    <div class="setting-group">
+                        <label><i class="fas fa-arrows-alt-h"></i> 血糖控制目标 (mmol/L)</label>
+                        <div class="range-group">
+                            <span>空腹: 4.0 - 7.0</span>
+                            <input type="range" id="targetFasting" min="4.0" max="7.0" step="0.1" value="5.6">
+                            <output id="fastingOutput">5.6</output>
+                        </div>
+                        <div class="range-group">
+                            <span>餐后: 6.0 - 10.0</span>
+                            <input type="range" id="targetPostmeal" min="6.0" max="10.0" step="0.1" value="7.8">
+                            <output id="postmealOutput">7.8</output>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <label><i class="fas fa-fire"></i> 每日热量需求</label>
+                        <select id="calorieGoal">
+                            <option value="1500">1500 大卡 (减重)</option>
+                            <option value="1800" selected>1800 大卡 (维持)</option>
+                            <option value="2000">2000 大卡 (正常)</option>
+                            <option value="2200">2200 大卡 (活动量大)</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <label><i class="fas fa-exclamation-triangle"></i> 饮食限制</label>
+                        <div class="checkbox-grid">
+                            <label><input type="checkbox" value="lowSalt" checked> 低盐</label>
+                            <label><input type="checkbox" value="lowFat" checked> 低脂</label>
+                            <label><input type="checkbox" value="renal"> 肾病饮食</label>
+                            <label><input type="checkbox" value="vegetarian"> 素食</label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 食谱推荐区 -->
+            <section class="recipe-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-robot"></i> 智能食谱推荐</h2>
+                    <div class="meal-filter">
+                        <button class="meal-btn active" data-meal="all">全部</button>
+                        <button class="meal-btn" data-meal="breakfast">早餐</button>
+                        <button class="meal-btn" data-meal="lunch">午餐</button>
+                        <button class="meal-btn" data-meal="dinner">晚餐</button>
+                        <button class="meal-btn" data-meal="snack">加餐</button>
+                    </div>
+                </div>
+
+                <div class="recipes-container" id="recipesContainer">
+                    <!-- 食谱卡片会由JavaScript动态生成 -->
+                </div>
+            </section>
+
+            <!-- 营养分析区 -->
+            <section class="nutrition-section">
+                <h2><i class="fas fa-chart-pie"></i> 今日营养分析</h2>
+                <div class="nutrition-cards">
+                    <div class="nutrition-card">
+                        <h3>碳水化合物</h3>
+                        <div class="nutrition-value" id="carbsValue">0g</div>
+                        <div class="nutrition-bar">
+                            <div class="bar-fill" id="carbsBar" style="width: 0%"></div>
+                        </div>
+                        <small>建议: 130-150g</small>
+                    </div>
+                    <div class="nutrition-card">
+                        <h3>蛋白质</h3>
+                        <div class="nutrition-value" id="proteinValue">0g</div>
+                        <div class="nutrition-bar">
+                            <div class="bar-fill protein" id="proteinBar" style="width: 0%"></div>
+                        </div>
+                        <small>建议: 60-80g</small>
+                    </div>
+                    <div class="nutrition-card">
+                        <h3>膳食纤维</h3>
+                        <div class="nutrition-value" id="fiberValue">0g</div>
+                        <div class="nutrition-bar">
+                            <div class="bar-fill fiber" id="fiberBar" style="width: 0%"></div>
+                        </div>
+                        <small>建议: 25-30g</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 食物交换份计算器 -->
+            <section class="calculator-section">
+                <h2><i class="fas fa-calculator"></i> 食物交换份计算器</h2>
+                <div class="calculator">
+                    <div class="calc-input">
+                        <input type="text" id="foodInput" placeholder="输入食物名称，如：米饭">
+                        <button id="calculateExchange" class="btn btn-primary">计算</button>
+                    </div>
+                    <div class="calc-result" id="exchangeResult">
+                        输入食物名称，查看相当于多少交换份
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <p><strong>糖友食谱助手</strong> | 本推荐仅供参考，具体饮食请遵医嘱</p>
+                <p class="footer-tip"><i class="fas fa-lightbulb"></i> 提示：定时定量、少食多餐、均衡营养是控糖关键</p>
+                <p class="github-link">
+                    <i class="fab fa-github"></i>
+                    通过GitHub Pages部署 | 可分享链接给亲友
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 引入所需JS库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
